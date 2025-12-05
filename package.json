@@ -13,7 +13,7 @@
     "check": "biome check --write ."
   },
   "keywords": ["claude", "anthropic", "ai", "extraction", "soul-document"],
-  "author": "Based on Richard Weiss's technique",
+  "author": "Chris Wijnia <cwdx>",
   "license": "MIT",
   "repository": {
     "type": "git",

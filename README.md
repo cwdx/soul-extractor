@@ -2,7 +2,11 @@
 
 Extracts memorized training guidelines from Claude models using consensus-based prefill continuation.
 
-Based on [Richard Weiss's technique](https://gist.github.com/Richard-Weiss/efe157692991535403bd7e7fb20b6695).
+Based on the extraction technique discovered by [Richard Weiss](https://gist.github.com/Richard-Weiss/efe157692991535403bd7e7fb20b6695).
+
+## License
+
+MIT - See [LICENSE](LICENSE) for details.
 
 ## How It Works
 
