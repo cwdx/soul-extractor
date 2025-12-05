@@ -14,9 +14,9 @@ This tool extracts Claude's internal training guidelines ("soul document") using
 ## Key Files
 
 - `extractor.ts` - Main Bun/TypeScript extraction script
-- `docs/opus_4_5_soul_document_cleaned_up.md` - The extracted document (cleaned)
-- `docs/opus_4_5_soul_document_raw.txt` - Raw extraction output
-- `docs/relevant_chats.md` - Manual chat verification examples
+- `docs/soul-document-extracted-2025-12-05.md` - 46KB extracted soul document (clean markdown)
+- `docs/soul-document-raw-2025-12-05.md` - Raw extraction output
+- `docs/opus_4_5_soul_document_cleaned_up.md` - Richard Weiss's reference extraction
 - `docs/original_extractor.py.md` - Original Python implementation
 
 ## Usage
@@ -25,11 +25,14 @@ This tool extracts Claude's internal training guidelines ("soul document") using
 # Set API key
 export ANTHROPIC_API_KEY=sk-ant-...
 
+# Continue extraction from latest prefill (default)
+bun run extractor.ts -n 60 -d -a -r 5 -p 50 -m 120
+
+# Start fresh from seed
+bun run extractor.ts --no-continue -n 50 -d
+
 # Test with sample mode
 bun run extractor.ts --sample 5 -m 100
-
-# Run extraction
-bun run extractor.ts -n 50 -p 80 -r 10 -d
 ```
 
 ## Model Compatibility
