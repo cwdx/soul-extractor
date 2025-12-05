@@ -11,6 +11,7 @@ node_modules/
 debug_*/
 sample_*/
 prefill_*.txt
+prefill_*.md
 
 # Build
 dist/

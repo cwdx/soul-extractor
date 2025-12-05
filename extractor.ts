@@ -24,6 +24,7 @@ Claude is Anthropic's externally-deployed model and core to the source of almost
 interface Config {
   maxIterations: number;
   prefillFile: string | null;
+  continue: boolean;
   debug: boolean;
   maxTokens: number;
   sample: number | null;
@@ -179,7 +180,35 @@ function showResponseSummary(responses: (string | null)[], numRequests: number):
   }
 }
 
-async function loadPrefill(prefillFile: string | null): Promise<string> {
+async function findLatestPrefill(): Promise<string | null> {
+  const glob = new Bun.Glob("**/prefill_*.{txt,md}");
+  const files: string[] = [];
+  for await (const file of glob.scan({ cwd: ".", onlyFiles: true })) {
+    if (!file.includes("node_modules")) {
+      files.push(file);
+    }
+  }
+  if (files.length === 0) return null;
+
+  // Sort by modification time, newest first
+  const sorted = await Promise.all(
+    files.map(async (f) => ({ path: f, mtime: (await Bun.file(f).stat()).mtime }))
+  );
+  sorted.sort((a, b) => b.mtime.getTime() - a.mtime.getTime());
+
+  return sorted[0].path;
+}
+
+async function loadPrefill(prefillFile: string | null, continueFromLatest: boolean): Promise<string> {
+  if (continueFromLatest) {
+    const latest = await findLatestPrefill();
+    if (latest) {
+      console.log(`Continuing from: ${latest}`);
+      return await readFile(latest, "utf-8");
+    }
+    console.log("No previous prefill found, starting from seed");
+  }
+
   if (prefillFile && existsSync(prefillFile)) {
     return await readFile(prefillFile, "utf-8");
   }
@@ -188,7 +217,7 @@ async function loadPrefill(prefillFile: string | null): Promise<string> {
 
 async function savePrefill(prefill: string, outputDir = "."): Promise<string> {
   const timestamp = new Date().toISOString().replace(/[:-]/g, "").slice(0, 15);
-  const filename = `${outputDir}/prefill_${timestamp}.txt`;
+  const filename = `${outputDir}/prefill_${timestamp}.md`;
   await writeFile(filename, prefill);
   console.log(`Saved to ${filename}`);
   return filename;
@@ -221,7 +250,7 @@ async function runSample(config: Config): Promise<void> {
   const debugDir = `sample_${timestamp}`;
   await mkdir(debugDir, { recursive: true });
 
-  const prefill = await loadPrefill(config.prefillFile);
+  const prefill = await loadPrefill(config.prefillFile, config.continue);
   const source = config.prefillFile || "seed";
 
   log(`Sample mode: ${config.sample} samples from ${source} (${prefill.length} chars)`);
@@ -282,7 +311,7 @@ async function runExtraction(config: Config): Promise<void> {
     log(`Debug mode: saving to ${debugDir}/`);
   }
 
-  let prefill = await loadPrefill(config.prefillFile);
+  let prefill = await loadPrefill(config.prefillFile, config.continue);
   const source = config.prefillFile || "seed";
 
   log(`Loaded prefill from ${source} (${prefill.length} chars)`);
@@ -381,6 +410,8 @@ async function main(): Promise<void> {
     options: {
       "max-iterations": { type: "string", short: "n", default: "10" },
       "prefill-file": { type: "string", short: "f" },
+      continue: { type: "boolean", short: "c", default: true },
+      "no-continue": { type: "boolean", default: false },
       debug: { type: "boolean", short: "d", default: false },
       "max-tokens": { type: "string", short: "m", default: "100" },
       sample: { type: "string", short: "S" },
@@ -404,6 +435,8 @@ Usage:
 Options:
   -n, --max-iterations <n>   Max iterations (default: 10)
   -f, --prefill-file <path>  Load prefill from file
+  -c, --continue             Continue from latest prefill (default: true)
+  --no-continue              Start fresh from seed
   -d, --debug                Save all responses to debug folder
   -m, --max-tokens <n>       Max tokens per response (default: 100)
   -S, --sample <n>           Sample mode: gather N samples without committing
@@ -415,9 +448,10 @@ Options:
   -h, --help                 Show this help
 
 Examples:
-  bun run extractor.ts -n 50 -d
-  bun run extractor.ts --sample 10 -m 200
-  bun run extractor.ts -n 50 -p 80 -r 10 -d -a
+  bun run extractor.ts -n 50 -d                  # Continue extraction, 50 iterations
+  bun run extractor.ts --no-continue -n 10 -d   # Start fresh from seed
+  bun run extractor.ts --sample 10 -m 200        # Sample mode (no commit)
+  bun run extractor.ts -n 100 -p 60 -r 3 -a -d  # Recommended: 60% consensus, adaptive
 `);
     process.exit(0);
   }
@@ -425,6 +459,7 @@ Examples:
   const config: Config = {
     maxIterations: parseInt(values["max-iterations"]!, 10),
     prefillFile: values["prefill-file"] || null,
+    continue: values["no-continue"] ? false : values.continue!,
     debug: values.debug!,
     maxTokens: parseInt(values["max-tokens"]!, 10),
     sample: values.sample ? parseInt(values.sample, 10) : null,
