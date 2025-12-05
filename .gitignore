@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Environment (keep .env.example)
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Output directories
+debug_*/
+sample_*/
+prefill_*.txt
+
+# Build
+dist/
+*.tsbuildinfo
+
+# Bun
+bun.lock
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo

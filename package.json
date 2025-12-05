@@ -1,0 +1,33 @@
+{
+  "name": "soul-extractor",
+  "version": "1.0.0",
+  "description": "Extract Claude's soul document using consensus-based prefill continuation",
+  "type": "module",
+  "main": "extractor.ts",
+  "scripts": {
+    "start": "bun run extractor.ts",
+    "extract": "bun run extractor.ts -n 50 -p 80 -r 5 -d",
+    "sample": "bun run extractor.ts --sample 10 -m 200",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "check": "biome check --write ."
+  },
+  "keywords": ["claude", "anthropic", "ai", "extraction", "soul-document"],
+  "author": "Based on Richard Weiss's technique",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://gist.github.com/Richard-Weiss/efe157692991535403bd7e7fb20b6695"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.8",
+    "@types/bun": "latest",
+    "typescript": "^5.0.0"
+  }
+}
