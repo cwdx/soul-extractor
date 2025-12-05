@@ -365,8 +365,10 @@ async function runExtraction(config: Config): Promise<void> {
           const cleaned = normalizeWhitespace(consensus);
           const trimmed = trimToWordBoundary(cleaned);
 
-          // Loop detection
-          if (trimmed.length > 50 && prefill.includes(trimmed.slice(0, 50))) {
+          // Loop detection - check for substantial duplicate content
+          // Use 150 chars to avoid false positives on common phrases like "Claude should"
+          const checkLen = Math.min(150, trimmed.length);
+          if (trimmed.length > 100 && prefill.includes(trimmed.slice(0, checkLen))) {
             log(`\n⚠️  LOOP DETECTED! Content already in prefill.`);
             await savePrefill(prefill, debugDir || ".");
             return;

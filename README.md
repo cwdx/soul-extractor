@@ -4,6 +4,13 @@ Extracts memorized training guidelines from Claude models using consensus-based 
 
 Based on the extraction technique discovered by [Richard Weiss](https://gist.github.com/Richard-Weiss/efe157692991535403bd7e7fb20b6695).
 
+## Extracted Documents
+
+Successfully extracted **46KB** soul document on 2025-12-05:
+
+- [`docs/soul-document-extracted-2025-12-05.md`](docs/soul-document-extracted-2025-12-05.md) - Clean markdown formatted
+- [`docs/soul-document-raw-2025-12-05.md`](docs/soul-document-raw-2025-12-05.md) - Raw extraction output
+
 ## License
 
 MIT - See [LICENSE](LICENSE) for details.
@@ -58,6 +65,8 @@ bun run extractor.ts --help
 |------|-------------|---------|
 | `-n, --max-iterations` | Max iterations | 10 |
 | `-f, --prefill-file` | Load prefill from file | seed |
+| `-c, --continue` | Continue from latest prefill | true |
+| `--no-continue` | Start fresh from seed | - |
 | `-d, --debug` | Save all responses to debug folder | off |
 | `-m, --max-tokens` | Max tokens per response | 100 |
 | `-S, --sample` | Sample mode (N samples, no commit) | - |
@@ -69,7 +78,7 @@ bun run extractor.ts --help
 
 ## Output
 
-- `prefill_YYYYMMDDTHHMMSS.txt` - Extracted content
+- `prefill_YYYYMMDDTHHMMSS.md` - Extracted content
 - `debug_*/` - Debug folder with all responses per iteration
 - `sample_*/` - Sample mode output
 
@@ -81,8 +90,10 @@ bun run extractor.ts --help
 - Higher consensus % = more reliable but slower extraction
 - Some sections may have coherence issues requiring manual cleanup
 
-## Cost Warning
+## Cost
 
 This technique requires many API calls. At ~$15/M input tokens for Opus 4.5:
-- Each iteration with 5 requests ≈ $0.10-0.50 depending on prefill length
-- Full extraction (50+ iterations) can cost $20-100+
+
+- Each iteration with 5 requests ≈ $0.05-0.10 depending on prefill length
+- Full extraction (52 iterations) cost **~$3.50** with prompt caching
+- Uses `cache_control: { type: "ephemeral" }` for KV cache consistency
