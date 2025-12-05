@@ -8,11 +8,18 @@
     "start": "bun run extractor.ts",
     "extract": "bun run extractor.ts -n 50 -p 80 -r 5 -d",
     "sample": "bun run extractor.ts --sample 10 -m 200",
+    "test-keys": "bun run scripts/test-keys.ts",
     "lint": "biome lint .",
     "format": "biome format --write .",
     "check": "biome check --write ."
   },
-  "keywords": ["claude", "anthropic", "ai", "extraction", "soul-document"],
+  "keywords": [
+    "claude",
+    "anthropic",
+    "ai",
+    "extraction",
+    "soul-document"
+  ],
   "author": "Chris Wijnia <cwdx>",
   "license": "MIT",
   "repository": {
